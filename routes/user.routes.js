@@ -2,7 +2,7 @@ import express from 'express';
 import { body, validationResult } from 'express-validator';
 import userModel from '../models/user.model.js';
 import bcrypt from 'bcrypt';
-
+import jwt from 'jsonwebtoken';
 
 const router = express.Router();
 
@@ -66,9 +66,18 @@ router.post('/login',
             })
         }
     
+    const token = jwt.sign({
+        userId: user._id,
+        username: user.username,
+        email: user.email
+    }, 
+    process.env.JWT_SECRET,
+    )   
+
+    res.cookie('token', token);
     
-
-
+    res.send('Logged in successfully');
+    
 
 })
 
