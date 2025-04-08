@@ -1,6 +1,7 @@
 import express from 'express';
 const router = express.Router();
 import { body, validationResult } from 'express-validator';
+import userModel from '../models/user.model.js';
 
 router.get('/register', (req, res) => {
     res.render('register');
@@ -8,23 +9,29 @@ router.get('/register', (req, res) => {
 
 
 router.post('/register',
-        body('email').trim().isEmail().isLength({min: 13}),
-        body('password').trim().isLength({ min: 5 }),
-        body('username').trim().isLength({ min: 3 }),
-    (req, res) => {
+    body('email').trim().isEmail().isLength({ min: 13 }),
+    body('password').trim().isLength({ min: 5 }),
+    body('username').trim().isLength({ min: 3 }),
+    async (req, res) => {
         const errors = validationResult(req);
 
         if (!errors.isEmpty()) {
-            return res.status(400).json({ 
+            return res.status(400).json({
                 errors: errors.array(),
                 message: "Invalid Data"
-            });
+            })
         }
-        console.log(errors);
-        
-        res.send(errors);
-    // console.log(req.body);
-    // res.send('User registered successfully!');
-})
+        const { username, email, password } = req.body;
+
+        const newUser = await userModel.create({
+            username,
+            email,
+            password
+        })
+
+        res.json(newUser);
+
+
+    })
 
 export default router;
