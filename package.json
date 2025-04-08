@@ -20,6 +20,8 @@
   "homepage": "https://github.com/itssoumodip/auth-drive-manager#readme",
   "dependencies": {
     "ejs": "^3.1.10",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "express-validator": "^7.2.1",
+    "mongoose": "^8.13.2"
   }
 }
