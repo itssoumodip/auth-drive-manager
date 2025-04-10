@@ -6,9 +6,276 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <title>Home</title>
+    <style>
+        @media (max-width: 640px) {
+            .file-name-mobile {
+                max-width: 180px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+        }
+        
+        .transition-all {
+            transition: all 0.3s ease;
+        }
+        
+        .progress-bar {
+            transition: width 0.3s ease-in-out;
+        }
+        
+        .file-item {
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+        
+        .file-item:hover {
+            transform: translateX(5px);
+        }
+        
+        .delete-btn {
+            transition: all 0.2s ease;
+        }
+        
+        .delete-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.3s ease forwards;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .pulse {
+            animation: pulse 1.5s ease infinite;
+        }
+    </style>
 </head>
+<body class="bg-gray-100 dark:bg-gray-900 min-h-screen">
+    <main class="container mx-auto px-4 sm:px-6 md:px-8 py-4 sm:py-6">
+        <h1 class="text-xl sm:text-2xl md:text-3xl font-bold mb-4 sm:mb-6 text-gray-800 dark:text-white">File Manager</h1>
+        
+        <button id="upload-button" class="w-full sm:w-auto mb-4 sm:mb-6 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 sm:py-2 px-4 rounded-lg transition-all flex items-center justify-center shadow-md hover:shadow-lg">
+            <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+            </svg>
+            Upload File
+        </button>
+        
+        <div id="upload-progress-container" class="hidden mb-4 sm:mb-6 p-3 sm:p-4 border border-gray-200 rounded-lg bg-white dark:bg-gray-800 shadow-md fade-in">
+            <div class="flex items-center mb-2">
+                <svg class="animate-spin -ml-1 mr-2 sm:mr-3 h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span id="upload-status" class="text-sm sm:text-base text-gray-700 dark:text-gray-300">Uploading file...</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full progress-bar" style="width: 0%"></div>
+            </div>
+            <p id="file-name" class="mt-2 text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate"></p>
+        </div>
+        
+        <div class="flex items-center justify-center w-full mb-6">
+            <label for="dropzone-file" class="flex flex-col items-center justify-center w-full h-40 sm:h-52 md:h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600 transition-all">
+                <div class="flex flex-col items-center justify-center pt-4 pb-5 px-3 sm:px-5 text-center">
+                    <svg class="w-7 h-7 sm:w-8 sm:h-8 mb-3 sm:mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
+                    </svg>
+                    <p class="mb-1 sm:mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">SVG, PNG, JPG or GIF (MAX. 800x400px)</p>
+                </div>
+                <input id="dropzone-file" type="file" class="hidden" />
+            </label>
+        </div>
 
-<body >
+        <div id="uploaded-files" class="mt-6 sm:mt-8">
+            <h2 class="text-lg sm:text-xl font-semibold text-gray-800 dark:text-white mb-3">Your Files</h2>
+            <div id="no-files-message" class="py-8 text-center text-gray-500 dark:text-gray-400 italic">
+                No files uploaded yet
+            </div>
+            <ul id="file-list" class="space-y-2 sm:space-y-3">
+            </ul>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadButton = document.getElementById('upload-button');
+            const fileInput = document.getElementById('dropzone-file');
+            const progressContainer = document.getElementById('upload-progress-container');
+            const progressBar = document.getElementById('progress-bar');
+            const uploadStatus = document.getElementById('upload-status');
+            const fileName = document.getElementById('file-name');
+            const fileList = document.getElementById('file-list');
+            const noFilesMessage = document.getElementById('no-files-message');
+            const dropZone = document.querySelector('label[for="dropzone-file"]');
+            
+            function updateFileListVisibility() {
+                if (fileList.children.length > 0) {
+                    noFilesMessage.style.display = 'none';
+                } else {
+                    noFilesMessage.style.display = 'block';
+                }
+            }
+            
+            updateFileListVisibility();
+            
+            uploadButton.addEventListener('click', function() {
+                fileInput.click();
+            });
+            
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, highlight, false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, unhighlight, false);
+            });
+            
+            function highlight() {
+                dropZone.classList.add('border-blue-500', 'bg-blue-50', 'dark:bg-blue-900/20');
+            }
+            
+            function unhighlight() {
+                dropZone.classList.remove('border-blue-500', 'bg-blue-50', 'dark:bg-blue-900/20');
+            }
+            
+            dropZone.addEventListener('drop', function(e) {
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    uploadFile(files[0]);
+                }
+            });
+            
+            fileInput.addEventListener('change', function(e) {
+                const files = e.target.files;
+                if (files.length > 0) {
+                    uploadFile(files[0]);
+                }
+            });
+            
+
+            function uploadFile(file) {
+                progressContainer.classList.remove('hidden');
+                fileName.textContent = file.name;
+                
+                uploadButton.disabled = true;
+                uploadButton.classList.add('opacity-50', 'cursor-not-allowed');
+                
+                let progress = 0;
+                
+                const interval = setInterval(() => {
+                    progress += 5;
+                    progressBar.style.width = progress + '%';
+                    
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        
+                        uploadStatus.textContent = 'Processing file...';
+                        uploadStatus.classList.add('pulse');
+                        
+                        setTimeout(() => {
+                            uploadStatus.classList.remove('pulse');
+                            uploadStatus.textContent = 'Upload Complete!';
+                            uploadStatus.classList.add('text-green-600');
+                            
+                            addFileToList(file);
+                            updateFileListVisibility();
+                            
+                            uploadButton.disabled = false;
+                            uploadButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                        
+                            setTimeout(() => {
+                                progressContainer.style.opacity = '0';
+                                progressContainer.style.transform = 'translateY(10px)';
+                                setTimeout(() => {
+                                    progressContainer.classList.add('hidden');
+                                    progressBar.style.width = '0%';
+                                    uploadStatus.textContent = 'Uploading file...';
+                                    uploadStatus.classList.remove('text-green-600');
+                                    fileInput.value = '';
+                                    progressContainer.style.opacity = '1';
+                                    progressContainer.style.transform = 'translateY(0)';
+                                }, 300);
+                            }, 2000);
+                        }, 1500);
+                    }
+                }, 100);
+            }
+            
+
+            function addFileToList(file) {
+                const li = document.createElement('li');
+                li.className = 'file-item flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg shadow fade-in';
+                
+                function formatFileSize(bytes) {
+                    if (bytes === 0) return '0 Bytes';
+                    const k = 1024;
+                    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                    const i = Math.floor(Math.log(bytes) / Math.log(k));
+                    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+                }
+                
+                function getFileIcon(fileName) {
+                    const extension = fileName.split('.').pop().toLowerCase();
+                    
+                    if(['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp'].includes(extension)) {
+                        return `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />`;
+                    } 
+                    else if(['pdf', 'doc', 'docx', 'txt', 'xls', 'xlsx'].includes(extension)) {
+                        return `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />`;
+                    }
+                    return `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />`;
+                }
+                
+                li.innerHTML = `
+                    <div class="flex items-center mb-2 sm:mb-0">
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-blue-500 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            ${getFileIcon(file.name)}
+                        </svg>
+                        <span class="text-gray-700 dark:text-gray-300 file-name-mobile truncate max-w-[200px] sm:max-w-xs">${file.name}</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-xs text-gray-500 mr-3">${formatFileSize(file.size)}</span>
+                        <button class="delete-btn text-red-500 hover:text-red-700 p-1.5 rounded-full hover:bg-red-100 dark:hover:bg-red-900/30">
+                            <svg class="w-4 h-4 sm:w-5 sm:h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+                    </div>
+                `;
+                
+                fileList.appendChild(li);
+                
+                const deleteBtn = li.querySelector('button');
+                deleteBtn.addEventListener('click', function() {
+                    li.style.opacity = '0';
+                    li.style.transform = 'translateX(20px)';
+                    setTimeout(() => {
+                        li.remove();
+                        updateFileListVisibility();
+                    }, 300);
+                });
+            }
+        });
+    </script>
 </body>
-
 </html>

@@ -3,6 +3,7 @@ import userRouter from './routes/user.routes.js';
 import dotenv from 'dotenv';
 import connectToDB from './config/db.js';
 import cookieParser from 'cookie-parser';
+import indexRouter from './routes/index.routes.js';
 
 dotenv.config();
 connectToDB();
@@ -13,6 +14,7 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use('/', indexRouter)
 app.use('/user', userRouter);
 
 app.listen(3005, () => {
