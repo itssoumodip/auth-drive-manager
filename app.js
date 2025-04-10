@@ -4,6 +4,9 @@ import dotenv from 'dotenv';
 import connectToDB from './config/db.js';
 import cookieParser from 'cookie-parser';
 import indexRouter from './routes/index.routes.js';
+import multer from 'multer';
+import { v4 as uuidV4 } from 'uuid';
+import cloudinary from 'cloudinary';
 
 dotenv.config();
 connectToDB();
