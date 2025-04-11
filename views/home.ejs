@@ -334,26 +334,24 @@
                 const formData = new FormData();
                 formData.append('file', file);
                 
-                // Simulate API call to Cloudinary (replace with actual API call)
-                setTimeout(() => {
-                    // Simulating a successful upload
-                    handleCloudUploadSuccess(fileId);
-                    
-                    // In a real implementation, you'd make an actual API call:
-                   
-                    fetch('/upload-to-cloudinary', {
-                        method: 'POST',
-                        body: formData
-                    })
-                    .then(response => response.json())
-                    .then(data => {
+                // Make API call to Cloudinary
+                fetch('/upload-to-cloudinary', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
                         handleCloudUploadSuccess(fileId, data.url);
-                    })
-                    .catch(error => {
-                        handleCloudUploadError(fileId, error);
-                    });
-                    
-                }, 2000);
+                        console.log("Successfully uploaded to Cloudinary:", data.url);
+                    } else {
+                        handleCloudUploadError(fileId, data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error("Error uploading to Cloudinary:", error);
+                    handleCloudUploadError(fileId, error);
+                });
             }
             
             // Handle successful cloud upload
