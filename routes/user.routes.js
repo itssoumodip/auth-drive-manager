@@ -40,27 +40,15 @@ router.post('/register',
 
             const hashPassword = await bcrypt.hash(password, 10);
 
-            const newUser = await userModel.create({
+            // Create the user
+            await userModel.create({
                 username,
                 email,
                 password: hashPassword
             });
 
-            const token = jwt.sign({
-                userId: newUser._id,
-                username: newUser.username,
-                email: newUser.email
-            }, process.env.JWT_SECRET, {
-                expiresIn: '24h' 
-            });
-
-            res.cookie('token', token, {
-                httpOnly: true,
-                maxAge: 24 * 60 * 60 * 1000, 
-                sameSite: 'strict'
-            });
-
-            res.redirect('/home');
+            // Redirect to login page with success message
+            res.redirect('/user/login?registered=success');
         } catch (error) {
             console.error("Registration error:", error);
             res.status(500).json({
