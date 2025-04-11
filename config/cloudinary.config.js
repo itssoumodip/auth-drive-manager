@@ -1,18 +1,23 @@
-// In your server file
 import express from 'express';
 import multer from 'multer';
-import cloudinary from './config/cloudinary.config.js';
+import { v2 as cloudinary } from 'cloudinary';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const app = express();
 const upload = multer({ storage: multer.memoryStorage() });
 
-// Route to handle Cloudinary uploads
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
 app.post('/upload-to-cloudinary', upload.single('file'), async (req, res) => {
   try {
-    // Upload to Cloudinary
     const result = await cloudinary.uploader.upload(req.file.path);
     
-    // Return success with the URL
     res.json({
       success: true,
       url: result.secure_url
@@ -25,3 +30,5 @@ app.post('/upload-to-cloudinary', upload.single('file'), async (req, res) => {
     });
   }
 });
+
+export default cloudinary;

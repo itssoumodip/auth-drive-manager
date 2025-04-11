@@ -1,6 +1,6 @@
-import expreess from 'express';
+import express from 'express';
 
-const router = expreess.Router();
+const router = express.Router();
 
 router.get('/home', (req, res) => {
     res.render('home');

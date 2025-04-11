@@ -4,9 +4,7 @@ import dotenv from 'dotenv';
 import connectToDB from './config/db.js';
 import cookieParser from 'cookie-parser';
 import indexRouter from './routes/index.routes.js';
-import multer from 'multer';
-import { v4 as uuidV4 } from 'uuid';
-import cloudinary from 'cloudinary';
+import uploadRoutes from './routes/upload.routes.js';
 
 dotenv.config();
 connectToDB();
@@ -19,6 +17,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use('/', indexRouter)
 app.use('/user', userRouter);
+app.use(uploadRoutes);
 
 app.listen(3005, () => {
     console.log('Server is running on port 3005');
