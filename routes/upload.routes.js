@@ -2,7 +2,8 @@ import express from 'express';
 import multer from 'multer';
 import cloudinary from '../config/cloudinary.config.js';
 import { Readable } from 'stream';
-import fileModel from '../models/files.model.js'; 
+import fileModel from '../models/files.model.js';
+import { authenticate } from '../middleware/auth.middleware.js';
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -17,22 +18,22 @@ const bufferToStream = (buffer) => {
   return readable;
 };
 
-router.post('/upload-to-cloudinary', upload.single('file'), async (req, res) => {
+
+router.post('/upload-to-cloudinary', authenticate, upload.single('file'), async (req, res) => {
   try {
+    if (!req.user || !req.user.userId) {
+      return res.status(401).json({
+        success: false,
+        error: 'Authentication required'
+      });
+    }
+
     if (!req.file) {
       return res.status(400).json({
         success: false,
         error: 'No file uploaded'
       });
     }
-
-    // For now, comment out the authentication check
-    // if (!req.user || !req.user._id) {
-    //   return res.status(401).json({
-    //     success: false,
-    //     error: 'Authentication required'
-    //   });
-    // }
 
     const uploadToCloudinary = new Promise((resolve, reject) => {
       const stream = cloudinary.uploader.upload_stream(
@@ -49,15 +50,15 @@ router.post('/upload-to-cloudinary', upload.single('file'), async (req, res) => 
       bufferToStream(req.file.buffer).pipe(stream);
     });
 
-    // Upload to Cloudinary and wait for result
+
     const cloudinaryResult = await uploadToCloudinary;
     
-    // Save file info to database - temporarily without user reference
+    console.log('User ID from token:', req.user.userId);
+    
     const fileDoc = await fileModel.create({
       path: cloudinaryResult.secure_url,
       originalName: req.file.originalname,
-      // Use a placeholder ID until authentication is set up
-      user: '65f67e71a2d3d2b1f35e6c9a' // You can use any valid ObjectId or remove this field temporarily
+      user: req.user.userId 
     });
 
     return res.json({
@@ -71,7 +72,7 @@ router.post('/upload-to-cloudinary', upload.single('file'), async (req, res) => 
     console.error('Upload error:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to process upload'
+      error: 'Failed to process upload: ' + error.message
     });
   }
 });

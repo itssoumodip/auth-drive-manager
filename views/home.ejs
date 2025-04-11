@@ -9,7 +9,7 @@
     <style>
         @media (max-width: 640px) {
             .file-name-mobile {
-                max-width: 180px;
+                max-width: 160px;
                 overflow: hidden;
                 text-overflow: ellipsis;
                 white-space: nowrap;
@@ -58,36 +58,117 @@
             animation: pulse 1.5s ease infinite;
         }
 
-        /* Add styles for cloud upload button */
+
         .cloud-upload-btn {
             transition: all 0.2s ease;
+            min-width: 40px;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
-        .cloud-upload-btn:hover {
-            transform: translateY(-2px);
+        @media (max-width: 640px) {
+            .cloud-upload-btn {
+                min-width: 44px;
+                min-height: 44px;
+                margin-left: 8px;
+            }
+            
+            .cloud-upload-btn svg {
+                width: 22px;
+                height: 22px;
+            }
+            
+            .file-name-mobile {
+                max-width: 160px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+            
+            /* Adjust spacing for file items on mobile */
+            .file-item {
+                padding: 12px;
+            }
         }
         
-        /* Cloud status indicator */
+        /* Make sure cloud status is properly sized on mobile */
         .cloud-status {
             display: inline-flex;
             align-items: center;
             font-size: 0.75rem;
             padding: 0.25rem 0.5rem;
             border-radius: 0.25rem;
-            margin-right: 0.5rem;
+        }
+        
+        @media (max-width: 640px) {
+            .cloud-status {
+                max-width: 90px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
         }
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 min-h-screen">
+ 
+    <header class="bg-white dark:bg-gray-800 shadow-sm">
+        <div class="container mx-auto px-4 py-3">
+
+            <div class="flex flex-col sm:hidden space-y-3">
+                <div class="flex justify-between items-center">
+                    <h1 class="text-xl font-bold text-gray-800 dark:text-white">File Manager</h1>
+                    <span class="text-sm text-gray-600 dark:text-gray-300">
+                        Hello, <%= user.username %>
+                    </span>
+                </div>
+                <div class="flex space-x-2">
+                    <a href="/gallery" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-3 rounded-lg text-sm transition-all shadow-sm hover:shadow flex items-center justify-center">
+                        <svg class="w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        View Gallery
+                    </a>
+                    <a href="/user/logout" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-3 rounded-lg text-sm transition-all shadow-sm hover:shadow flex items-center justify-center">
+                        <svg class="w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        Logout
+                    </a>
+                </div>
+            </div>
+
+            <div class="hidden sm:flex sm:justify-between sm:items-center">
+                <div class="flex items-center space-x-4">
+                    <h1 class="text-xl font-bold text-gray-800 dark:text-white">File Manager</h1>
+                    <a href="/gallery" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-1.5 px-4 rounded-lg text-sm transition-all shadow-sm hover:shadow flex items-center">
+                        <svg class="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        View Gallery
+                    </a>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm text-gray-600 dark:text-gray-300">
+                        Hello, <%= user.username %>
+                    </span>
+                    <a href="/user/logout" class="bg-red-500 hover:bg-red-600 text-white font-medium py-1.5 px-4 rounded-lg text-sm transition-all shadow-sm hover:shadow flex items-center">
+                        <svg class="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+    
     <main class="container mx-auto px-4 sm:px-6 md:px-8 py-4 sm:py-6">
-        <h1 class="text-xl sm:text-2xl md:text-3xl font-bold mb-4 sm:mb-6 text-gray-800 dark:text-white">File Manager</h1>
-        
-        <button id="upload-button" class="w-full sm:w-auto mb-4 sm:mb-6 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 sm:py-2 px-4 rounded-lg transition-all flex items-center justify-center shadow-md hover:shadow-lg">
-            <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-            </svg>
-            Upload File
-        </button>
+    
+
         
         <div id="upload-progress-container" class="hidden mb-4 sm:mb-6 p-3 sm:p-4 border border-gray-200 rounded-lg bg-white dark:bg-gray-800 shadow-md fade-in">
             <div class="flex items-center mb-2">
@@ -127,14 +208,15 @@
             <div id="no-files-message" class="py-8 text-center text-gray-500 dark:text-gray-400 italic">
                 No files uploaded yet
             </div>
-            <ul id="file-list" class="space-y-2 sm:space-y-3">
+            <ul id="file-list" class="space-y-3">
+                <!-- File items will be added here dynamically -->
             </ul>
         </div>
     </main>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const uploadButton = document.getElementById('upload-button');
+            
             const fileInput = document.getElementById('dropzone-file');
             const progressContainer = document.getElementById('upload-progress-container');
             const progressBar = document.getElementById('progress-bar');
@@ -154,9 +236,6 @@
             
             updateFileListVisibility();
             
-            uploadButton.addEventListener('click', function() {
-                fileInput.click();
-            });
             
             ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
                 dropZone.addEventListener(eventName, preventDefaults, false);
@@ -201,10 +280,7 @@
             function uploadFile(file) {
                 progressContainer.classList.remove('hidden');
                 fileName.textContent = file.name;
-                
-                uploadButton.disabled = true;
-                uploadButton.classList.add('opacity-50', 'cursor-not-allowed');
-                
+
                 let progress = 0;
                 
                 const interval = setInterval(() => {
@@ -224,9 +300,7 @@
                             
                             addFileToList(file);
                             updateFileListVisibility();
-                            
-                            uploadButton.disabled = false;
-                            uploadButton.classList.remove('opacity-50', 'cursor-not-allowed');
+            
                         
                             setTimeout(() => {
                                 progressContainer.style.opacity = '0';
@@ -271,7 +345,6 @@
                     return `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />`;
                 }
                 
-                // Create a file ID to track this file
                 const fileId = 'file-' + Date.now();
                 li.setAttribute('data-file-id', fileId);
                 
@@ -282,26 +355,27 @@
                         </svg>
                         <span class="text-gray-700 dark:text-gray-300 file-name-mobile truncate max-w-[200px] sm:max-w-xs">${file.name}</span>
                     </div>
-                    <div class="flex items-center mt-2 sm:mt-0">
-                        <span class="text-xs text-gray-500 mr-3">${formatFileSize(file.size)}</span>
+                    <div class="flex items-center justify-between mt-2 sm:mt-0 w-full sm:w-auto">
+                        <span class="text-xs text-gray-500">${formatFileSize(file.size)}</span>
                         
-                        <!-- Cloud status indicator (initially hidden) -->
-                        <span class="cloud-status hidden" id="cloud-status-${fileId}"></span>
-                        
-                        <!-- Cloud upload button -->
-                        <button class="cloud-upload-btn mr-2 text-blue-500 hover:text-blue-700 p-1.5 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/30" id="cloud-btn-${fileId}">
-                            <svg class="w-4 h-4 sm:w-5 sm:h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                            </svg>
-                        </button>
-                        
+                        <div class="flex items-center ml-auto">
+                            <!-- Cloud status indicator (initially hidden) -->
+                            <span class="cloud-status hidden mr-2" id="cloud-status-${fileId}"></span>
+                            
+                            <!-- Cloud upload button -->
+                            <button class="cloud-upload-btn text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/30" id="cloud-btn-${fileId}">
+                                <svg class="w-5 h-5 sm:w-5 sm:h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                 `;
                 
                 fileList.appendChild(li);
                 
                           
-                // Add cloud upload functionality
+
                 const cloudBtn = li.querySelector(`#cloud-btn-${fileId}`);
                 const cloudStatus = li.querySelector(`#cloud-status-${fileId}`);
                 
@@ -315,11 +389,8 @@
                 const cloudBtn = document.getElementById(`cloud-btn-${fileId}`);
                 const cloudStatus = document.getElementById(`cloud-status-${fileId}`);
                 
-                // Disable button during upload
                 cloudBtn.disabled = true;
                 cloudBtn.classList.add('opacity-50', 'cursor-not-allowed');
-                
-                // Show uploading status
                 cloudStatus.classList.remove('hidden');
                 cloudStatus.classList.add('bg-yellow-100', 'text-yellow-800', 'dark:bg-yellow-900/30', 'dark:text-yellow-300');
                 cloudStatus.innerHTML = `
@@ -330,11 +401,9 @@
                     Uploading to cloud...
                 `;
                 
-                // Create form data for the file
                 const formData = new FormData();
                 formData.append('file', file);
                 
-                // Make API call to Cloudinary
                 fetch('/upload-to-cloudinary', {
                     method: 'POST',
                     body: formData
@@ -353,25 +422,22 @@
                     handleCloudUploadError(fileId, error);
                 });
             }
-            
-            // Handle successful cloud upload
+
             function handleCloudUploadSuccess(fileId, cloudUrl = null) {
                 const cloudBtn = document.getElementById(`cloud-btn-${fileId}`);
                 const cloudStatus = document.getElementById(`cloud-status-${fileId}`);
                 
-                // Update status indicator
                 cloudStatus.classList.remove('bg-yellow-100', 'text-yellow-800', 'dark:bg-yellow-900/30', 'dark:text-yellow-300');
                 cloudStatus.classList.add('bg-green-100', 'text-green-800', 'dark:bg-green-900/30', 'dark:text-green-300');
                 cloudStatus.innerHTML = `
-                    <svg class="w-3 h-3 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg class="w-3 h-3 mr-1 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                     </svg>
-                    Uploaded
+                    <span>Uploaded</span>
                 `;
-                
-                // Replace cloud button with check icon
+
                 cloudBtn.innerHTML = `
-                    <svg class="w-4 h-4 sm:w-5 sm:h-5 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg class="w-5 h-5 sm:w-5 sm:h-5 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 `;
@@ -379,13 +445,11 @@
                 cloudBtn.classList.add('opacity-80', 'cursor-default');
                 cloudBtn.classList.remove('hover:text-blue-700', 'hover:bg-blue-100');
             }
-            
-            // Handle cloud upload error
+
             function handleCloudUploadError(fileId, error) {
                 const cloudBtn = document.getElementById(`cloud-btn-${fileId}`);
                 const cloudStatus = document.getElementById(`cloud-status-${fileId}`);
-                
-                // Update status indicator
+ 
                 cloudStatus.classList.remove('bg-yellow-100', 'text-yellow-800', 'dark:bg-yellow-900/30', 'dark:text-yellow-300');
                 cloudStatus.classList.add('bg-red-100', 'text-red-800', 'dark:bg-red-900/30', 'dark:text-red-300');
                 cloudStatus.innerHTML = `
@@ -394,8 +458,6 @@
                     </svg>
                     Failed
                 `;
-                
-                // Re-enable cloud button for retry
                 cloudBtn.disabled = false;
                 cloudBtn.classList.remove('opacity-50', 'cursor-not-allowed');
             }
