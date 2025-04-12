@@ -122,7 +122,7 @@
         <% if (files && files.length > 0) { %>
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
                 <% files.forEach(function(file) { %>
-                    <div class="gallery-item bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-md fade-in">
+                    <div class="gallery-item bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-md fade-in" data-file-id="<%= file._id %>">
                         <% if (file.path && (file.path.endsWith('.jpg') || file.path.endsWith('.jpeg') || file.path.endsWith('.png') || file.path.endsWith('.gif') || file.path.endsWith('.webp'))) { %>
                             <img src="<%= file.path %>" alt="<%= file.originalName %>" class="w-full thumbnail rounded-t-lg">
                         <% } else { %>
@@ -141,11 +141,29 @@
                                 <span class="text-xs text-gray-500 dark:text-gray-400">
                                     <%= new Date(file.createdAt).toLocaleDateString() %>
                                 </span>
-                                <a href="<%= file.path %>" target="_blank" class="text-blue-500 hover:text-blue-600">
-                                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                                    </svg>
-                                </a>
+                                <div class="flex space-x-2">
+                                    <a href="/download/<%= file._id %>" class="text-blue-500 hover:text-blue-600" title="Download">
+                                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                        </svg>
+                                    </a>
+                                    
+                                    <a href="<%= file.path %>" target="_blank" class="text-green-500 hover:text-green-600" title="View">
+                                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                        </svg>
+                                    </a>
+                                    
+                                    <!-- Delete button -->
+                                    <button class="text-red-500 hover:text-red-600 delete-btn" 
+                                            data-file-id="<%= file._id %>" 
+                                            data-file-name="<%= file.originalName %>" 
+                                            title="Delete">
+                                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -171,6 +189,7 @@
     </main>
 
     <script>
+    document.addEventListener('DOMContentLoaded', function() {
         const mobileMenuToggle = document.getElementById('mobileMenuToggle');
         const mobileMenu = document.getElementById('mobileMenu');
         
@@ -179,6 +198,116 @@
                 mobileMenu.classList.toggle('hidden');
             });
         }
-    </script>
+        
+        const deleteModal = document.getElementById('deleteModal');
+        const cancelDelete = document.getElementById('cancelDelete');
+        const confirmDelete = document.getElementById('confirmDelete');
+        const fileNameSpan = document.getElementById('fileName');
+        let currentFileId = null;
+        
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const fileId = this.getAttribute('data-file-id');
+                const fileName = this.getAttribute('data-file-name');
+                
+                console.log('Delete clicked for file:', fileId, fileName);
+                
+                currentFileId = fileId;
+                fileNameSpan.textContent = fileName;
+                deleteModal.classList.remove('hidden');
+            });
+        });
+        
+        if (cancelDelete) {
+            cancelDelete.addEventListener('click', function() {
+                deleteModal.classList.add('hidden');
+                currentFileId = null;
+            });
+        }
+        
+        if (deleteModal) {
+            deleteModal.addEventListener('click', function(e) {
+                if (e.target === deleteModal) {
+                    deleteModal.classList.add('hidden');
+                    currentFileId = null;
+                }
+            });
+        }
+        
+        if (confirmDelete) {
+            confirmDelete.addEventListener('click', async function() {
+                if (!currentFileId) return;
+                
+                try {
+                    confirmDelete.textContent = 'Deleting...';
+                    confirmDelete.disabled = true;
+                    
+                    console.log('Sending delete request for:', currentFileId);
+                    
+                    const response = await fetch(`/delete-file/${currentFileId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`Server returned ${response.status}`);
+                    }
+                    
+                    const result = await response.json();
+                    console.log('Delete response:', result);
+                    
+                    if (result.success) {
+                        const fileElement = document.querySelector(`.gallery-item[data-file-id="${currentFileId}"]`);
+                        if (fileElement) {
+                            fileElement.classList.add('opacity-0');
+                            setTimeout(() => {
+                                fileElement.remove();
+                                
+                                const remainingFiles = document.querySelectorAll('.gallery-item');
+                                if (remainingFiles.length === 0) {
+                                    location.reload(); 
+                                }
+                            }, 300);
+                        }
+                        deleteModal.classList.add('hidden');
+                    } else {
+                        alert('Failed to delete file: ' + (result.error || 'Unknown error'));
+                    }
+                } catch (error) {
+                    console.error('Error deleting file:', error);
+                    alert('An error occurred while deleting the file: ' + error.message);
+                } finally {
+                    confirmDelete.textContent = 'Delete';
+                    confirmDelete.disabled = false;
+                    currentFileId = null;
+                }
+            });
+        }
+    });
+</script>
+
+    <div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-sm mx-4 shadow-xl">
+            <div class="text-center mb-4">
+                <svg class="w-12 h-12 text-red-500 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white">Delete File</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                    Are you sure you want to delete "<span id="fileName" class="font-medium"></span>"? This action cannot be undone.
+                </p>
+            </div>
+            <div class="flex justify-center space-x-4">
+                <button id="cancelDelete" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg transition-colors">
+                    Cancel
+                </button>
+                <button id="confirmDelete" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors">
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

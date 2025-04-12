@@ -7,7 +7,7 @@ import jwt from 'jsonwebtoken';
 const router = express.Router();
 
 router.get('/register', (req, res) => {
-    res.render('register');
+    res.render('register', { error: null });
 });
 
 router.post('/register',
@@ -18,49 +18,47 @@ router.post('/register',
         const errors = validationResult(req);
 
         if (!errors.isEmpty()) {
-            return res.status(400).json({
-                errors: errors.array(),
-                message: "Invalid Data"
+            return res.render('register', { 
+                error: "Please check your input - all fields must be valid",
+                formData: req.body
             });
         }
         
         try {
             const { username, email, password } = req.body;
 
-            // Check if user already exists
             const existingUser = await userModel.findOne({ 
                 $or: [{ username }, { email }]
             });
             
             if (existingUser) {
-                return res.status(400).json({
-                    message: "Username or email already exists"
+                return res.render('register', { 
+                    error: "Username or email already exists",
+                    formData: req.body 
                 });
             }
 
             const hashPassword = await bcrypt.hash(password, 10);
 
-            // Create the user
             await userModel.create({
                 username,
                 email,
                 password: hashPassword
             });
 
-            // Redirect to login page with success message
             res.redirect('/user/login?registered=success');
         } catch (error) {
             console.error("Registration error:", error);
-            res.status(500).json({
-                message: "Error creating user",
-                error: error.message
+            res.render('register', { 
+                error: "An error occurred while creating your account. Please try again.",
+                formData: req.body
             });
         }
     }
 );
 
 router.get('/login', (req, res) => {
-    res.render('login');
+    res.render('login', { error: null });
 });
 
 router.post('/login', 
@@ -70,9 +68,9 @@ router.post('/login',
         const errors = validationResult(req);
 
         if (!errors.isEmpty()) {
-            return res.status(400).json({
-                error: errors.array(),
-                message: "Invalid Data"
+            return res.render('login', { 
+                error: "Username and password must be valid",
+                formData: req.body
             });
         }
 
@@ -82,16 +80,18 @@ router.post('/login',
             const user = await userModel.findOne({ username });
             
             if (!user) {
-                return res.status(400).json({ 
-                    message: "Username or password is incorrect"
+                return res.render('login', { 
+                    error: "Username or password is incorrect",
+                    formData: { username }
                 });
             }
             
             const isMatch = await bcrypt.compare(password, user.password);
             
             if (!isMatch) {
-                return res.status(400).json({ 
-                    message: "Username or password is incorrect"
+                return res.render('login', { 
+                    error: "Username or password is incorrect",
+                    formData: { username }
                 });
             }
         
@@ -109,13 +109,12 @@ router.post('/login',
                 sameSite: 'strict'
             });
 
-         
             res.redirect('/home');
         } catch (error) {
             console.error("Login error:", error);
-            res.status(500).json({
-                message: "Error during login",
-                error: error.message
+            res.render('login', { 
+                error: "An error occurred during login. Please try again.",
+                formData: { username: req.body.username }
             });
         }
     }

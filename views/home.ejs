@@ -87,13 +87,11 @@
                 white-space: nowrap;
             }
             
-            /* Adjust spacing for file items on mobile */
             .file-item {
                 padding: 12px;
             }
         }
         
-        /* Make sure cloud status is properly sized on mobile */
         .cloud-status {
             display: inline-flex;
             align-items: center;
@@ -209,7 +207,6 @@
                 No files uploaded yet
             </div>
             <ul id="file-list" class="space-y-3">
-                <!-- File items will be added here dynamically -->
             </ul>
         </div>
     </main>
@@ -384,7 +381,6 @@
                 });
             }
             
-            // New function to handle Cloudinary uploads
             function uploadToCloudinary(file, fileId) {
                 const cloudBtn = document.getElementById(`cloud-btn-${fileId}`);
                 const cloudStatus = document.getElementById(`cloud-status-${fileId}`);

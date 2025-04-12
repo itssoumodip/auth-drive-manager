@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/itssoumodip/auth-drive-manager#readme",
   "dependencies": {
+    "axios": "^1.8.4",
     "bcrypt": "^5.1.1",
     "cloudinary": "^2.6.0",
     "cookie-parser": "^1.4.7",
