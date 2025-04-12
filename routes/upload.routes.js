@@ -1,6 +1,6 @@
 import express from 'express';
 import multer from 'multer';
-import { v2 as cloudinary } from 'cloudinary';
+import cloudinary from '../config/cloudinary.config.js';
 import { Readable } from 'stream';
 import fileModel from '../models/files.model.js';
 import { authenticate } from '../middleware/auth.middleware.js';
@@ -19,61 +19,60 @@ const bufferToStream = (buffer) => {
   return readable;
 };
 
-
 router.post('/upload-to-cloudinary', authenticate, upload.single('file'), async (req, res) => {
   try {
-    if (!req.user || !req.user.userId) {
-      return res.status(401).json({
-        success: false,
-        error: 'Authentication required'
-      });
-    }
-
     if (!req.file) {
-      return res.status(400).json({
-        success: false,
-        error: 'No file uploaded'
-      });
+      return res.status(400).json({ success: false, error: 'No file provided' });
     }
 
-    const uploadToCloudinary = new Promise((resolve, reject) => {
-      const stream = cloudinary.uploader.upload_stream(
+    console.log('File received:', req.file.originalname);
+    console.log('Cloudinary config:', {
+      cloudName: process.env.CLOUDINARY_CLOUD_NAME ? 'Set' : 'Not set',
+      apiKey: process.env.CLOUDINARY_API_KEY ? 'Set' : 'Not set',
+      apiSecret: process.env.CLOUDINARY_API_SECRET ? 'Set' : 'Not set'
+    });
+
+    // Check if API credentials are available
+    if (!process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_SECRET) {
+      console.error('Cloudinary credentials are missing');
+      return res.status(500).json({ success: false, error: 'Cloud storage configuration missing' });
+    }
+
+    // Upload to Cloudinary using a Promise
+    const result = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
         { folder: 'drive-manager' },
         (error, result) => {
           if (error) {
+            console.error('Cloudinary upload error:', error);
             reject(error);
-            return;
+          } else {
+            resolve(result);
           }
-          resolve(result);
         }
       );
-      
-      bufferToStream(req.file.buffer).pipe(stream);
+
+      // Pipe the file buffer to the upload stream
+      bufferToStream(req.file.buffer).pipe(uploadStream);
     });
 
-
-    const cloudinaryResult = await uploadToCloudinary;
-    
-    console.log('User ID from token:', req.user.userId);
-    
-    const fileDoc = await fileModel.create({
-      path: cloudinaryResult.secure_url,
+    // Save file info to database
+    const newFile = await fileModel.create({
+      path: result.secure_url,
       originalName: req.file.originalname,
-      user: req.user.userId 
+      user: req.user.userId
     });
 
-    return res.json({
+    res.json({
       success: true,
-      url: cloudinaryResult.secure_url,
-      public_id: cloudinaryResult.public_id,
-      fileId: fileDoc._id
+      url: result.secure_url,
+      fileId: newFile._id
     });
-      
   } catch (error) {
     console.error('Upload error:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to process upload: ' + error.message
+      error: error.message || 'Failed to upload file'
     });
   }
 });
