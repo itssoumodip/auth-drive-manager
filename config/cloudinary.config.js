@@ -16,7 +16,8 @@ cloudinary.config({
 
 app.post('/upload-to-cloudinary', upload.single('file'), async (req, res) => {
   try {
-    const result = await cloudinary.uploader.upload(req.file.path);
+    const result = await cloudinary.uploader.upload_stream({ resource_type: 'auto' }, callback);
+
     
     res.json({
       success: true,
