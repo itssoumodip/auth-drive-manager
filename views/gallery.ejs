@@ -29,6 +29,38 @@
         .fade-in {
             animation: fadeIn 0.3s ease forwards;
         }
+        
+        .logo-circle {
+            border-radius: 50%;
+            object-fit: cover;
+            aspect-ratio: 1/1;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 2px solid #f8f9fa;
+        }
+        
+        @media (max-width: 640px) {
+            .action-buttons {
+                display: flex;
+                gap: 0.5rem;
+            }
+            
+            .file-info {
+                max-width: 150px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            
+            .gallery-grid {
+                grid-template-columns: repeat(1, minmax(0, 1fr));
+            }
+        }
+        
+        @media (min-width: 640px) and (max-width: 768px) {
+            .gallery-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
     </style>
 </head>
 
@@ -38,9 +70,9 @@
             <div class="sm:hidden w-full">
                 <div class="flex justify-between items-center">
                     <div class="flex items-center">
-                        <svg class="w-5 h-5 mr-2 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
+                        <img src="https://images.unsplash.com/vector-1744464103893-d6a1a3ffd2bf?q=80&w=2360&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
+                             alt="File Manager Logo" 
+                             class="h-8 w-8 mr-2 logo-circle">
                         <h1 class="text-lg font-bold text-gray-800 dark:text-white">File Gallery</h1>
                     </div>
                     <button id="mobileMenuToggle" class="focus:outline-none">
@@ -81,9 +113,9 @@
             <div class="hidden sm:flex sm:flex-row justify-between items-center">
                 <div class="flex items-center space-x-4">
                     <div class="flex items-center">
-                        <svg class="w-6 h-6 mr-2 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
+                        <img src="https://images.unsplash.com/vector-1744464103893-d6a1a3ffd2bf?q=80&w=2360&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
+                             alt="File Manager Logo" 
+                             class="h-10 w-10 mr-2 logo-circle">
                         <h1 class="text-xl font-bold text-gray-800 dark:text-white">File Gallery</h1>
                     </div>
                     
@@ -120,7 +152,7 @@
         </div>
         
         <% if (files && files.length > 0) { %>
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 gallery-grid">
                 <% files.forEach(function(file) { %>
                     <div class="gallery-item bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-md fade-in" data-file-id="<%= file._id %>">
                         <% if (file.path && (file.path.endsWith('.jpg') || file.path.endsWith('.jpeg') || file.path.endsWith('.png') || file.path.endsWith('.gif') || file.path.endsWith('.webp'))) { %>
@@ -134,14 +166,14 @@
                         <% } %>
                         
                         <div class="p-4">
-                            <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 truncate" title="<%= file.originalName %>">
+                            <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 truncate file-info" title="<%= file.originalName %>">
                                 <%= file.originalName %>
                             </h3>
                             <div class="flex justify-between items-center mt-3">
                                 <span class="text-xs text-gray-500 dark:text-gray-400">
                                     <%= new Date(file.createdAt).toLocaleDateString() %>
                                 </span>
-                                <div class="flex space-x-2">
+                                <div class="flex space-x-2 action-buttons">
                                     <a href="/download/<%= file._id %>" class="text-blue-500 hover:text-blue-600" title="Download">
                                         <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
