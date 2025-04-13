@@ -32,13 +32,11 @@ router.post('/upload-to-cloudinary', authenticate, upload.single('file'), async 
       apiSecret: process.env.CLOUDINARY_API_SECRET ? 'Set' : 'Not set'
     });
 
-    // Check if API credentials are available
     if (!process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_SECRET) {
       console.error('Cloudinary credentials are missing');
       return res.status(500).json({ success: false, error: 'Cloud storage configuration missing' });
     }
 
-    // Upload to Cloudinary using a Promise
     const result = await new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         { folder: 'drive-manager' },
@@ -52,11 +50,9 @@ router.post('/upload-to-cloudinary', authenticate, upload.single('file'), async 
         }
       );
 
-      // Pipe the file buffer to the upload stream
       bufferToStream(req.file.buffer).pipe(uploadStream);
     });
 
-    // Save file info to database
     const newFile = await fileModel.create({
       path: result.secure_url,
       originalName: req.file.originalname,
